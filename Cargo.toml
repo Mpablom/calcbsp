@@ -1,0 +1,9 @@
+[package]
+name = "calcbsp"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+evalexpr = "4.0.0"
+gtk = "0.14.0"
+gdk = "0.14.0"
