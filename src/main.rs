@@ -1,36 +1,36 @@
-extern crate gtk;
 extern crate gdk;
-use gtk::prelude::*;
+extern crate gtk;
 use evalexpr::eval;
+use gtk::prelude::*;
 
 fn main() {
-    // Inicializa GTK
+    // Inicializar GTK
     gtk::init().expect("Failed to initialize GTK.");
 
-    // Crea una ventana principal
+    // Crear ventana principal
     let window = gtk::Window::new(gtk::WindowType::Toplevel);
     window.set_title("Calculadora");
 
-    // Crea un layout de cuadrícula para organizar los botones
+    // Crear cuadrícula para organizar botones
     let grid = gtk::Grid::new();
     grid.set_row_spacing(5);
     grid.set_column_spacing(5);
     window.add(&grid);
 
-    // Crea un entry para mostrar la expresión y el resultado
+    // Crear un entry para mostrar la expresión y el resultado
     let entry = gtk::Entry::new();
     entry.set_editable(false);
     entry.set_width_chars(30);
-    entry.set_size_request(0, 80); // Doble de alto
+    entry.set_size_request(0, 150); // Doble de alto
     grid.attach(&entry, 0, 0, 4, 1);
 
-    // Distribución de botones según especificaciones
+    // Especificaciones de botones
     let buttons = [
-        ("C", 1, 1, 0, 1), ("(", 1, 1, 1, 1), (")", 1, 1, 2, 1), ("/", 1, 1, 3, 1),
-        ("7", 1, 1, 0, 2), ("8", 1, 1, 1, 2), ("9", 1, 1, 2, 2), ("x", 1, 1, 3, 2),
-        ("4", 1, 1, 0, 3), ("5", 1, 1, 1, 3), ("6", 1, 1, 2, 3), ("-", 1, 1, 3, 3),
-        ("1", 1, 1, 0, 4), ("2", 1, 1, 1, 4), ("3", 1, 1, 2, 4), ("+", 1, 2, 3, 4),
-        ("0", 1, 1, 0, 5), (".", 1, 1, 1, 5), ("=", 1, 1, 2, 5)
+        ("C", 1, 1, 0, 1),("(", 1, 1, 1, 1),(")", 1, 1, 2, 1),("/", 1, 1, 3, 1),
+        ("7", 1, 1, 0, 2),("8", 1, 1, 1, 2),("9", 1, 1, 2, 2),("x", 1, 1, 3, 2),
+        ("4", 1, 1, 0, 3),("5", 1, 1, 1, 3),("6", 1, 1, 2, 3),("-", 1, 1, 3, 3),
+        ("1", 1, 1, 0, 4),("2", 1, 1, 1, 4),("3", 1, 1, 2, 4),("+", 1, 2, 3, 4),
+        ("0", 1, 1, 0, 5),(".", 1, 1, 1, 5),("=", 1, 1, 2, 5),
     ];
 
     for &(label, width, height, col, row) in &buttons {
@@ -45,13 +45,12 @@ fn main() {
 
         // Conectar señal de clic al botón
         let entry_clone = entry.clone();
-        let label_clone = label.to_string();
         button.connect_clicked(move |_| {
             let text = entry_clone.text().to_string();
-            let new_text = match label_clone.as_str() {
+            let new_text = match label {
                 "=" => evaluate_expression(&text),
                 "C" => String::new(),
-                _ => format!("{}{}", text, label_clone),
+                _ => format!("{}{}", text, label),
             };
             entry_clone.set_text(&new_text);
         });
@@ -61,7 +60,42 @@ fn main() {
         grid.attach(&button, col, row, width, height);
     }
 
-    // Aplicar estilo a los botones
+    // Conectar evento de presionar tecla
+    window.connect_key_press_event(move |_, key| {
+        let keyval = key.keyval();
+        let _keystate = key.state();
+        let entry_text = entry.text().to_string(); // Usa to_string() aquí
+
+        // Compara el valor numérico de la tecla presionada
+        match keyval {
+            gdk::keys::constants::Return => entry.set_text(&evaluate_expression(&entry_text)),
+            gdk::keys::constants::Escape => entry.set_text(""),
+            gdk::keys::constants::BackSpace => {
+                let mut chars = entry_text.chars();
+                chars.next_back();
+                entry.set_text(&chars.as_str())
+            }
+            // Agrega aquí más teclas si es necesario
+            _ => {
+                if let Some(character) = keyval.to_unicode() {
+                    let character_str = character.to_string();
+                    if character_str
+                        .chars()
+                        .next()
+                        .unwrap_or_default()
+                        .is_digit(10)
+                        || "+-*/().".contains(character_str.as_str())
+                    {
+                        entry.set_text(&format!("{}{}", entry_text, character_str));
+                    }
+                }
+            }
+        }
+
+        Inhibit(false)
+    });
+
+     // Aplicar estilo a los botones
     let provider = gtk::CssProvider::new();
     provider
         .load_from_data(
@@ -88,7 +122,7 @@ fn main() {
         gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
     );
 
-    // Ajustar el tamaño de la ventana al contenido
+    // Ajustar tamaño de la ventana al contenido
     window.set_resizable(false);
     window.show_all();
     gtk::main();
@@ -96,7 +130,8 @@ fn main() {
 
 fn evaluate_expression(expression: &str) -> String {
     // Evaluar la expresión y devolver el resultado
-    if let Ok(result) = eval(expression) {
+    let expression = expression.replace("x", "*");
+    if let Ok(result) = eval(&expression) {
         result.to_string()
     } else {
         "Error".to_string()
