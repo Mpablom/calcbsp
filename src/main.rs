@@ -21,7 +21,7 @@ fn main() {
     let entry = gtk::Entry::new();
     entry.set_editable(false);
     entry.set_width_chars(30);
-    entry.set_size_request(0, 150); // Doble de alto
+    entry.set_size_request(0, 150);
     grid.attach(&entry, 0, 0, 4, 1);
 
     // Especificaciones de botones
@@ -64,7 +64,7 @@ fn main() {
     window.connect_key_press_event(move |_, key| {
         let keyval = key.keyval();
         let _keystate = key.state();
-        let entry_text = entry.text().to_string(); // Usa to_string() aquí
+        let entry_text = entry.text().to_string();
 
         // Compara el valor numérico de la tecla presionada
         match keyval {
@@ -75,7 +75,6 @@ fn main() {
                 chars.next_back();
                 entry.set_text(&chars.as_str())
             }
-            // Agrega aquí más teclas si es necesario
             _ => {
                 if let Some(character) = keyval.to_unicode() {
                     let character_str = character.to_string();
