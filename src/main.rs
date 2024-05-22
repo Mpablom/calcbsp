@@ -25,7 +25,7 @@ fn main() {
     // Crear un entry para mostrar la expresión y el resultado
     let entry = gtk::Entry::new();
     entry.set_editable(false);
-entry.set_size_request(223, 150);
+    entry.set_size_request(223, 150);
     entry.style_context().add_class("screen");
     entry.set_halign(gtk::Align::Center);
     entry.set_valign(gtk::Align::Center);
@@ -72,28 +72,12 @@ entry.set_size_request(223, 150);
 /// Crea los botones de la calculadora y los añade a la cuadrícula.
 fn create_buttons(grid: &gtk::Grid, entry: &gtk::Entry) {
     let buttons = [
-        ("ln", 1, 1, 0, 1),
-        ("log", 1, 1, 1, 1),
-        ("C", 1, 1, 2, 1),
-        ("⏻", 1, 1, 3, 1),
-        ("(", 1, 1, 1, 2),
-        (")", 1, 1, 2, 2),
-        ("/", 1, 1, 3, 2),
-        ("7", 1, 1, 0, 3),
-        ("8", 1, 1, 1, 3),
-        ("9", 1, 1, 2, 3),
-        ("x", 1, 1, 3, 3),
-        ("4", 1, 1, 0, 4),
-        ("5", 1, 1, 1, 4),
-        ("6", 1, 1, 2, 4),
-        ("-", 1, 1, 3, 4),
-        ("1", 1, 1, 0, 5),
-        ("2", 1, 1, 1, 5),
-        ("3", 1, 1, 2, 5),
-        ("+", 1, 2, 3, 5),
-        ("0", 1, 1, 0, 6),
-        (".", 1, 1, 1, 6),
-        ("=", 1, 1, 2, 6),
+        ("ln", 1, 1, 0, 1),("log", 1, 1, 1, 1),("C", 1, 1, 2, 1),("⏻", 1, 1, 3, 1),
+        ("(", 1, 1, 1, 2),(")", 1, 1, 2, 2),("/", 1, 1, 3, 2),
+        ("7", 1, 1, 0, 3),("8", 1, 1, 1, 3),("9", 1, 1, 2, 3),("x", 1, 1, 3, 3),
+        ("4", 1, 1, 0, 4),("5", 1, 1, 1, 4),("6", 1, 1, 2, 4),("-", 1, 1, 3, 4),
+        ("1", 1, 1, 0, 5),("2", 1, 1, 1, 5),("3", 1, 1, 2, 5),("+", 1, 2, 3, 5),
+        ("0", 1, 1, 0, 6),(".", 1, 1, 1, 6),("=", 1, 1, 2, 6),
     ];
 
     for &(label, width, height, col, row) in &buttons {
@@ -184,7 +168,7 @@ fn apply_css() {
 fn evaluate_expression(expression: &str) -> String {
     let expression = expression
         .replace("x", "*")
-        .replace("ln", "lnf") // Para evitar conflicto con funciones de eval
+        .replace("ln", "lnf") 
         .replace("log", "log10f");
 
     // Definimos las funciones ln y log10
