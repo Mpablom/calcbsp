@@ -1,0 +1,30 @@
+.grid{
+    padding: 7px;
+    padding-right: 3px;
+    margin: 2px;
+}
+.operation {
+    background-color: #d88876;
+    color: black;
+    font-weight: bold;
+    font-family: 'JetBrains Mono NerdFont';
+   
+}
+.normal{
+    font-family: 'JetBrains Mono NerdFont';
+}
+.clear {
+    background-color: #5ba8d4;
+    color: rgb(255, 255, 255);
+    font-weight: bold;
+}
+.screen {
+    background-color: rgba(0, 0, 0, 0.8);
+    font-size: 20pt;
+    font-family: 'JetBrains Mono NerdFont';
+}
+.power{
+    background-color: #994949;
+    color: white;
+    font-weight: bold;
+}
