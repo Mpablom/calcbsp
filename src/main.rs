@@ -6,6 +6,11 @@ use evalexpr::{eval_with_context, Context, Function, HashMapContext, Value};
 use gtk::prelude::*;
 
 fn main() {
+    run();
+}
+
+// La funcion Run corre el sistema
+fn run (){
     // Inicializar GTK
     gtk::init().expect("Failed to initialize GTK.");
 
