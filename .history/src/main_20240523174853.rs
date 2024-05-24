@@ -39,7 +39,7 @@ fn run (){
     entry.set_hexpand(true);
     entry.set_widget_name("screen");
 
-    //Crear botón power
+    //Crear boton power
     let power_label = gtk::Label::new(None);
     power_label.set_text("⏻");
     let power_button = gtk::Button::new();
@@ -105,7 +105,7 @@ fn style_button(button: &gtk::Button, label: &str) {
     }
 }
 
-/// Añade el botón a la cuadrícula y conecta la señal de click.
+/// Añade el botón a la cuadrícula y conecta la señal de clic.
 fn attach_button(
     grid: &gtk::Grid,
     button: &gtk::Button,
