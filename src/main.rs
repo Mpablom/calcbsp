@@ -10,7 +10,7 @@ fn main() {
 }
 
 // La funcion Run corre el sistema
-fn run (){
+fn run() {
     // Inicializar GTK
     gtk::init().expect("Failed to initialize GTK.");
 
@@ -78,7 +78,7 @@ fn run (){
 fn create_buttons(grid: &gtk::Grid, entry: &gtk::Entry) {
     let buttons = [
         ("ln", 1, 1, 0, 1),("log", 1, 1, 1, 1),("C", 1, 1, 2, 1),("⏻", 1, 1, 3, 1),
-        ("(", 1, 1, 1, 2),(")", 1, 1, 2, 2),("/", 1, 1, 3, 2),
+        ("^", 1, 1, 0, 2),("(", 1, 1, 1, 2),(")", 1, 1, 2, 2),("/", 1, 1, 3, 2),
         ("7", 1, 1, 0, 3),("8", 1, 1, 1, 3),("9", 1, 1, 2, 3),("x", 1, 1, 3, 3),
         ("4", 1, 1, 0, 4),("5", 1, 1, 1, 4),("6", 1, 1, 2, 4),("-", 1, 1, 3, 4),
         ("1", 1, 1, 0, 5),("2", 1, 1, 1, 5),("3", 1, 1, 2, 5),("+", 1, 2, 3, 5),
@@ -86,15 +86,24 @@ fn create_buttons(grid: &gtk::Grid, entry: &gtk::Entry) {
     ];
 
     for &(label, width, height, col, row) in &buttons {
-        let button = gtk::Button::with_label(label);
+        let button = if label == "^" {
+            let label = gtk::Label::new(None);
+            label.set_markup("x<sup>y</sup>"); 
+            let button = gtk::Button::new();
+            button.add(&label);
+            button
+        } else {
+            gtk::Button::with_label(label)
+        };
         style_button(&button, label);
         attach_button(grid, &button, entry, label, width, height, col, row);
-    }
+    } 
+    
 }
 
 /// Aplica estilos a los botones según su etiqueta.
 fn style_button(button: &gtk::Button, label: &str) {
-    if ["/", "x", "-", "+", "=", "(", ")", "ln", "log"].contains(&label) {
+    if ["/", "x", "-", "+", "=", "(", ")", "^", "ln", "log"].contains(&label) {
         button.style_context().add_class("operation");
     } else if label == "C" {
         button.style_context().add_class("clear");
@@ -148,7 +157,7 @@ fn handle_key_press(key: &gdk::EventKey, entry: &gtk::Entry) {
         _ => {
             if let Some(character) = keyval.to_unicode() {
                 let character_str = character.to_string();
-                if character.is_digit(10) || "+-*/().lnlog⏻".contains(character_str.as_str()) {
+                if character.is_digit(10) || "+-*/().lnlog^⏻".contains(character_str.as_str()) {
                     entry.set_text(&format!("{}{}", entry_text, character_str));
                 }
             }
@@ -173,8 +182,9 @@ fn apply_css() {
 fn evaluate_expression(expression: &str) -> String {
     let expression = expression
         .replace("x", "*")
-        .replace("ln", "lnf") 
-        .replace("log", "log10f");
+        .replace("ln", "lnf")
+        .replace("log", "log10f")
+        .replace(" ^ ", "pow");
 
     // Definimos las funciones ln y log10
     let mut context = HashMapContext::new();
@@ -202,7 +212,22 @@ fn evaluate_expression(expression: &str) -> String {
             ),
         )
         .unwrap();
+    context
+        .set_function(
+            "pow".into(),
+            Function::new(
+                Some(2),
+                Box::new(|arguments| {
+                    println!("Base: {:?}", arguments[0]);
+                    println!("Exponente: {:?}", arguments[1]);
+                    let base = arguments[0].as_number()?;
+                    let exponent = arguments[1].as_number()?;
+                    Ok(Value::from(base.powf(exponent)))
+                }),
+            ),
+        )
+        .unwrap();
 
     eval_with_context(&expression, &context)
-        .map_or("Error".to_string(), |result| result.to_string())
+        .map_or_else(|_| "Error".to_string(), |result| result.to_string())
 }
