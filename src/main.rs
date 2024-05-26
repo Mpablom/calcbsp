@@ -7,8 +7,6 @@ mod handlers;
 mod evaluator;
 mod styles;
 
-use gtk::prelude::*;
-
 fn main() {
     ui::run();
 }
