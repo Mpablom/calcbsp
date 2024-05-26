@@ -18,7 +18,7 @@ pub fn run() {
 
     let entry = gtk::Entry::new();
     entry.set_editable(false);
-    entry.set_size_request(223, 150);
+    entry.set_size_request(350, 150);
     entry.style_context().add_class("screen");
     entry.set_halign(gtk::Align::Center);
     entry.set_valign(gtk::Align::Center);
