@@ -34,7 +34,7 @@ pub fn run() {
     crate::handlers::style_button(&power_button, "⏻");
     power_button.set_size_request(50, 50);
 
-    grid.attach(&power_button, 3, 1, 1, 1);
+    grid.attach(&power_button, 4, 1, 1, 1);
     power_button.connect_clicked(|_| {
         gtk::main_quit();
     });
