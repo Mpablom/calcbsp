@@ -1,14 +1,16 @@
 use gtk::prelude::*;
 use crate::evaluator::evaluate_expression;
+use crate::trigonometricas;
 
 pub fn create_buttons(grid: &gtk::Grid, entry: &gtk::Entry) {
     let buttons = [
-        ("ln", 1, 1, 0, 1),("log", 1, 1, 1, 1),("C", 1, 1, 2, 1),("⏻", 1, 1, 3, 1),
-        ("^", 1, 1, 0, 2),("(", 1, 1, 1, 2),(")", 1, 1, 2, 2),("/", 1, 1, 3, 2),
-        ("7", 1, 1, 0, 3),("8", 1, 1, 1, 3),("9", 1, 1, 2, 3),("x", 1, 1, 3, 3),
-        ("4", 1, 1, 0, 4),("5", 1, 1, 1, 4),("6", 1, 1, 2, 4),("-", 1, 1, 3, 4),
-        ("1", 1, 1, 0, 5),("2", 1, 1, 1, 5),("3", 1, 1, 2, 5),("+", 1, 2, 3, 5),
-        ("0", 1, 1, 0, 6),(".", 1, 1, 1, 6),("=", 1, 1, 2, 6),
+        ("ln", 1, 1, 0, 3),("log", 1, 1, 1, 3),("C", 1, 1, 3, 1),("⏻", 1, 1, 4, 1),
+        ("^", 1, 1, 0, 4),("√", 1, 1, 1, 4),("sin", 1, 1, 2, 4),("cos", 1, 1, 3, 4),("tan",1,1,4,4),
+        ("7", 1, 1, 0, 5),("8", 1, 1, 1, 5),("9", 1, 1, 2, 5),("(", 1, 1, 3, 5),(")",1,1,4,5),
+        ("4", 1, 1, 0, 6),("5", 1, 1, 1, 6),("6", 1, 1, 2, 6),("x", 1, 1, 3, 6),("/", 1, 1, 4, 6),
+        ("1", 1, 1, 0, 7),("2", 1, 1, 1, 7),("3", 1, 1, 2, 7),("+", 1, 1, 3, 7),("-",1,1,4,7),
+        ("0", 1, 1, 0, 8),(".", 1, 1, 1, 8),("(-)", 1, 1, 2, 8),("=",2,1,3,8)
+        
     ];
 
     for &(label, width, height, col, row) in &buttons {
@@ -27,7 +29,7 @@ pub fn create_buttons(grid: &gtk::Grid, entry: &gtk::Entry) {
 }
 
 pub fn style_button(button: &gtk::Button, label: &str) {
-    if ["/", "x", "-", "+", "=", "(", ")", "^", "ln", "log"].contains(&label) {
+    if ["/", "x", "-", "+", "=", "(", ")", "^", "√", "ln", "log", "sin", "cos", "tan"].contains(&label) {
         button.style_context().add_class("operation");
     } else if label == "C" {
         button.style_context().add_class("clear");
@@ -55,6 +57,17 @@ fn attach_button(
         let new_text = match label_clone.as_str() {
             "=" => evaluate_expression(&text),
             "C" => String::new(),
+            "sin" => trigonometricas::sin(evaluate_expression(&text).parse().unwrap_or(0.0)).to_string(),
+            "cos" => trigonometricas::cos(evaluate_expression(&text).parse().unwrap_or(0.0)).to_string(),
+            "tan" => trigonometricas::tan(evaluate_expression(&text).parse().unwrap_or(0.0)).to_string(),
+             "√" => {
+                let result = evaluate_expression(&text).parse::<f64>().unwrap_or(0.0).sqrt();
+                if result.is_nan() || result.is_infinite() {
+                    String::from("Error")
+                } else {
+                    result.to_string()
+                }
+            },
             _ => format!("{}{}", text, label_clone),
         };
         entry_clone.set_text(&new_text);

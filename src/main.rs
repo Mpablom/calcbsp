@@ -6,6 +6,7 @@ mod ui;
 mod handlers;
 mod evaluator;
 mod styles;
+mod trigonometricas;
 
 fn main() {
     ui::run();
