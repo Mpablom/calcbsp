@@ -12,7 +12,7 @@ pub fn evaluate_expression(expression: &str) -> String {
 
     let mut context = HashMapContext::new();
     context.set_value("π".to_string(), Value::from(PI)).unwrap();
-    context.set_value("e".to_string(), Value::from(E)).unwrap();
+    context.set_value("𝑒".to_string(), Value::from(E)).unwrap();
     context
         .set_function(
             "lnf".into(),
