@@ -1,13 +1,18 @@
 use evalexpr::{eval_with_context, Context, Function, HashMapContext, Value};
 
+const PI: f64 = 3.14159265358979323846264338327950288;
+const E: f64 = 2.71828182845904523536028747135266250;
+
 pub fn evaluate_expression(expression: &str) -> String {
     let expression = expression
         .replace("x", "*")
-        .replace("ln", "lnf")
-        .replace("log", "log10f")
+        .replace("𝑙𝑛", "lnf")
+        .replace("𝑙𝑜𝑔", "log10f")
         .replace(" ^ ", "pow");
 
     let mut context = HashMapContext::new();
+    context.set_value("π".to_string(), Value::from(PI)).unwrap();
+    context.set_value("e".to_string(), Value::from(E)).unwrap();
     context
         .set_function(
             "lnf".into(),
