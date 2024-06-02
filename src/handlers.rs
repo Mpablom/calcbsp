@@ -1,6 +1,7 @@
 use gtk::prelude::*;
 use crate::evaluator::evaluate_expression;
 use crate::trigonometricas;
+use crate::calculatorState;
 
 pub fn create_buttons(grid: &gtk::Grid, entry: &gtk::Entry) {
     let buttons = [
@@ -53,35 +54,12 @@ fn attach_button(
 ) {
     let entry_clone = entry.clone();
     let label_clone = label.to_string();
-    button.connect_clicked(move |_| {
-        let text = entry_clone.text().to_string();
-        let new_text = match label_clone.as_str() {
-            "=" => evaluate_expression(&text),
-            "C" => String::new(),
-            "𝑠𝑖𝑛" => trigonometricas::sin(evaluate_expression(&text).parse().unwrap_or(0.0)).to_string(),
-            "𝑐𝑜𝑠" => trigonometricas::cos(evaluate_expression(&text).parse().unwrap_or(0.0)).to_string(),
-            "𝑡𝑎𝑛" => trigonometricas::tan(evaluate_expression(&text).parse().unwrap_or(0.0)).to_string(),
-             "√" => {
-                let result = evaluate_expression(&text).parse::<f64>().unwrap_or(0.0).sqrt();
-                if result.is_nan() || result.is_infinite() {
-                    String::from("Error")
-                } else {
-                    result.to_string()
-                }
-            },
-            "( - )" => {
-                let current_text = entry_clone.text().to_string();
-                if current_text.starts_with('-') {
-                    entry_clone.set_text(&current_text[1..]);
-                } else {
-                    entry_clone.set_text(&format!("-{}", current_text));
-                }
-                entry_clone.text().to_string()
-            },
-            _ => format!("{}{}", text, label_clone),
-        };
-        entry_clone.set_text(&new_text);
+    let mut calc_state = calculatorState::new();
+      button.connect_clicked(move |_| {
+        calc_state.handle_input(&label_clone);
+        entry_clone.set_text(&calc_state.entry_text);
     });
+    
     button.set_size_request(50 * width, 50 * height);
     grid.attach(button, col, row, width, height);
 }
