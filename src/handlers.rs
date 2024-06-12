@@ -1,6 +1,7 @@
 use gtk::prelude::*;
 use crate::evaluator::evaluate_expression;
 use crate::trigonometricas;
+use crate::calculatorState;
 
 pub fn create_buttons(grid: &gtk::Grid, entry: &gtk::Entry) {
     let buttons = [
@@ -87,6 +88,7 @@ fn attach_button(
         };
         entry_clone.set_text(&new_text);
     });
+    
     button.set_size_request(50 * width, 50 * height);
     grid.attach(button, col, row, width, height);
 }
