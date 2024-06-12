@@ -5,7 +5,7 @@ use crate::trigonometricas;
 pub fn create_buttons(grid: &gtk::Grid, entry: &gtk::Entry) {
     let buttons = [
         ("C", 1, 1, 3, 1),("⏻", 1, 1, 4, 1),
-        ("𝑙𝑛", 1, 1, 0, 3),("𝑙𝑜𝑔", 1, 1, 1, 3),("𝑒", 1,1,2,3),( "π", 1, 1, 3, 3),
+        ("𝑙𝑛", 1, 1, 0, 3),("𝑙𝑜𝑔", 1, 1, 1, 3),("𝑒", 1,1,2,3),( "π", 1, 1, 3, 3),("%",1,1,4,3),
         ("^", 1, 1, 0, 4),("√", 1, 1, 1, 4),("𝑠𝑖𝑛", 1, 1, 2, 4),("𝑐𝑜𝑠", 1, 1, 3, 4),("𝑡𝑎𝑛",1,1,4,4),
         ("7", 1, 1, 0, 5),("8", 1, 1, 1, 5),("9", 1, 1, 2, 5),("(", 1, 1, 3, 5),(")",1,1,4,5),
         ("4", 1, 1, 0, 6),("5", 1, 1, 1, 6),("6", 1, 1, 2, 6),("x", 1, 1, 3, 6),("/", 1, 1, 4, 6),
@@ -30,7 +30,7 @@ pub fn create_buttons(grid: &gtk::Grid, entry: &gtk::Entry) {
 }
 
 pub fn style_button(button: &gtk::Button, label: &str) {
-    if ["/", "x", "-", "+", "=", "(", ")", "^", "√", "𝑙𝑛", "𝑙𝑜𝑔", "𝑠𝑖𝑛", "𝑐𝑜𝑠", "𝑡𝑎𝑛", "𝑒", "π"].contains(&label) {
+    if ["/", "x", "-", "+", "=", "(", ")", "^", "√", "𝑙𝑛", "𝑙𝑜𝑔", "𝑠𝑖𝑛", "𝑐𝑜𝑠", "𝑡𝑎𝑛", "𝑒", "π", "%"].contains(&label) {
         button.style_context().add_class("operation");
     } else if label == "C" || label == "( - )" {
         button.style_context().add_class("clear");
@@ -68,6 +68,11 @@ fn attach_button(
                 } else {
                     result.to_string()
                 }
+            },
+            "%" => {
+                let value = evaluate_expression(&text).parse::<f64>().unwrap_or(0.0);
+                let result = value / 100.0;
+                format!("{:.8}", result)
             },
             "( - )" => {
                 let current_text = entry_clone.text().to_string();
