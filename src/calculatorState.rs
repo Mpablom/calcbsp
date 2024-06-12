@@ -1,5 +1,7 @@
 use std::collections::VecDeque;
 
+use crate::evaluator::evaluate_expression;
+
 struct CalculatorState {
     entry_text: String,
     parenthesis_stack: VecDeque<char>,
