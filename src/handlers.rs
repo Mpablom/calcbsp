@@ -54,10 +54,39 @@ fn attach_button(
 ) {
     let entry_clone = entry.clone();
     let label_clone = label.to_string();
-    let mut calc_state = calculatorState::new();
-      button.connect_clicked(move |_| {
-        calc_state.handle_input(&label_clone);
-        entry_clone.set_text(&calc_state.entry_text);
+    button.connect_clicked(move |_| {
+        let text = entry_clone.text().to_string();
+        let new_text = match label_clone.as_str() {
+            "=" => evaluate_expression(&text),
+            "C" => String::new(),
+            "𝑠𝑖𝑛" => trigonometricas::sin(evaluate_expression(&text).parse().unwrap_or(0.0)).to_string(),
+            "𝑐𝑜𝑠" => trigonometricas::cos(evaluate_expression(&text).parse().unwrap_or(0.0)).to_string(),
+            "𝑡𝑎𝑛" => trigonometricas::tan(evaluate_expression(&text).parse().unwrap_or(0.0)).to_string(),
+             "√" => {
+                let result = evaluate_expression(&text).parse::<f64>().unwrap_or(0.0).sqrt();
+                if result.is_nan() || result.is_infinite() {
+                    String::from("Error")
+                } else {
+                    result.to_string()
+                }
+            },
+            "%" => {
+                let value = evaluate_expression(&text).parse::<f64>().unwrap_or(0.0);
+                let result = value / 100.0;
+                format!("{:.8}", result)
+            },
+            "( - )" => {
+                let current_text = entry_clone.text().to_string();
+                if current_text.starts_with('-') {
+                    entry_clone.set_text(&current_text[1..]);
+                } else {
+                    entry_clone.set_text(&format!("-{}", current_text));
+                }
+                entry_clone.text().to_string()
+            },
+            _ => format!("{}{}", text, label_clone),
+        };
+        entry_clone.set_text(&new_text);
     });
     
     button.set_size_request(50 * width, 50 * height);

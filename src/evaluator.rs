@@ -1,5 +1,7 @@
 use evalexpr::{eval_with_context, Context, Function, HashMapContext, Value};
-use regex::Regex;
+use evalexpr::{eval_with_context, Context, Function, HashMapContext, Value};
+use bigdecimal::BigDecimal;
+
 
 const PI: f64 = 3.14159265358979323846264338327950288;
 const E: f64 = 2.71828182845904523536028747135266250;
@@ -57,8 +59,21 @@ pub fn evaluate_expression(expression: &str) -> String {
         )
         .unwrap();
 
-    eval_with_context(&expression, &context)
-        .map_or_else(|_| "Error".to_string(), |result| result.to_string())
+    let result = eval_with_context(&expression, &context);
+    
+    match result {
+        Ok(value) => {
+            // Convertimos el valor a BigDecimal
+            let decimal_value = BigDecimal::from_f64(value.as_float().unwrap()).unwrap();
+
+            // Redondeamos el resultado a 20 decimales
+            let rounded_result = decimal_value.round_dp_with_strategy(20, bigdecimal::RoundingStrategy::RoundHalfUp);
+
+            // Convertimos el resultado a una cadena
+            rounded_result.to_string()
+        }
+        Err(_) => "Error".to_string(),
+    }
 }
 
 fn replace_percentage(expression: &str) -> String {

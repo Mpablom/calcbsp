@@ -8,4 +8,5 @@ evalexpr = "4.0.0"
 gtk = "0.14.0"
 gdk = "0.14.0"
 pango = "0.19.5"
-regex = "1.0"
+bigdecimal = "0.4.0"
+
