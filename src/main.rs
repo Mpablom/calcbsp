@@ -7,9 +7,7 @@ mod handlers;
 mod evaluator;
 mod styles;
 mod trigonometricas;
-mod calculatorState;
-
-
+mod calculator_state;
 fn main() {
     ui::run();
 }
