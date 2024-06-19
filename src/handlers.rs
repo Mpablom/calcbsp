@@ -86,16 +86,9 @@ fn attach_button(
                 }
             },
             "%" => {
-                 if let Some(index) = text.rfind(|c: char| c.is_digit(10) || c == '.') {
-                    let base_value = &text[index..];
-                    if let Ok(base) = base_value.parse::<f64>() {
-                        format!("{:.8}%", base)
-                    } else {
-                        "Error: Entrada no válida".to_string()
-                    }
-                } else {
-                    "Error: Entrada no válida".to_string()
-                }
+               let formatted_text = format!("{}%", text.trim());
+                entry_clone.set_text(&formatted_text);
+                return;
             },
             "( - )" => {
                 let current_text = entry_clone.text().to_string();
@@ -120,23 +113,7 @@ pub fn handle_key_press(key: &gdk::EventKey, entry: &gtk::Entry) {
     let entry_text = entry.text().to_string();
     match keyval {
         gdk::keys::constants::Return => {
-            if entry_text.contains('%') {
-                let parts: Vec<&str> = entry_text.split('%').collect();
-                if parts.len() == 2 {
-                    let base_text = parts[0].trim();
-                    let percentage_text = parts[1].trim();
-                    if let (Ok(base), Ok(percentage)) = (base_text.parse::<f64>(), percentage_text.parse::<f64>()) {
-                        let result = base * (percentage / 100.0);
-                        entry.set_text(&format!("{:.8}", result));
-                    } else {
-                        entry.set_text("Error: Entrada no válida");
-                    }
-                } else {
-                    entry.set_text("Error: Entrada no válida");
-                }
-            } else {
-                entry.set_text(&evaluate_expression(&entry_text));
-            }
+            entry.set_text(&evaluate_expression(&entry_text));
         },
         gdk::keys::constants::Escape => entry.set_text(""),
         gdk::keys::constants::BackSpace => {
