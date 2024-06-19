@@ -1,7 +1,6 @@
 use gtk::prelude::*;
 use crate::evaluator::evaluate_expression;
 use crate::trigonometricas;
-use crate::calculatorState;
 
 pub fn create_buttons(grid: &gtk::Grid, entry: &gtk::Entry) {
     let buttons = [
@@ -59,21 +58,37 @@ fn attach_button(
         let new_text = match label_clone.as_str() {
             "=" => evaluate_expression(&text),
             "C" => String::new(),
-            "𝑠𝑖𝑛" => trigonometricas::sin(evaluate_expression(&text).parse().unwrap_or(0.0)).to_string(),
-            "𝑐𝑜𝑠" => trigonometricas::cos(evaluate_expression(&text).parse().unwrap_or(0.0)).to_string(),
-            "𝑡𝑎𝑛" => trigonometricas::tan(evaluate_expression(&text).parse().unwrap_or(0.0)).to_string(),
+            "𝑠𝑖𝑛" => {
+                let result = evaluate_expression(&text).parse::<f64>().ok()
+                    .map_or_else(|| "Error".to_string(), |value| trigonometricas::sin(&value.to_string()));
+                result
+            },
+            "𝑐𝑜𝑠" => {
+                let result = evaluate_expression(&text).parse::<f64>().ok()
+                    .map_or_else(|| "Error".to_string(), |value| trigonometricas::cos(&value.to_string()));
+                result
+            },
+            "𝑡𝑎𝑛" => {
+                let result = evaluate_expression(&text).parse::<f64>().ok()
+                    .map_or_else(|| "Error".to_string(), |value| trigonometricas::tan(&value.to_string()));
+                result
+            },
              "√" => {
-                let result = evaluate_expression(&text).parse::<f64>().unwrap_or(0.0).sqrt();
-                if result.is_nan() || result.is_infinite() {
-                    String::from("Error")
+                if let Ok(number) = evaluate_expression(&text).parse::<f64>() {
+                    let result = number.sqrt();
+                    if result.is_nan() || result.is_infinite() {
+                        "Error".to_string()
+                    } else {
+                        result.to_string()
+                    }
                 } else {
-                    result.to_string()
+                    "Error".to_string()
                 }
             },
             "%" => {
-                let value = evaluate_expression(&text).parse::<f64>().unwrap_or(0.0);
-                let result = value / 100.0;
-                format!("{:.8}", result)
+               let formatted_text = format!("{}%", text.trim());
+                entry_clone.set_text(&formatted_text);
+                return;
             },
             "( - )" => {
                 let current_text = entry_clone.text().to_string();
@@ -97,7 +112,9 @@ pub fn handle_key_press(key: &gdk::EventKey, entry: &gtk::Entry) {
     let keyval = key.keyval();
     let entry_text = entry.text().to_string();
     match keyval {
-        gdk::keys::constants::Return => entry.set_text(&evaluate_expression(&entry_text)),
+        gdk::keys::constants::Return => {
+            entry.set_text(&evaluate_expression(&entry_text));
+        },
         gdk::keys::constants::Escape => entry.set_text(""),
         gdk::keys::constants::BackSpace => {
             let new_text = entry_text
@@ -109,10 +126,11 @@ pub fn handle_key_press(key: &gdk::EventKey, entry: &gtk::Entry) {
         _ => {
             if let Some(character) = keyval.to_unicode() {
                 let character_str = character.to_string();
-                if character.is_digit(10) || "+-*/().𝑙𝑛𝑙𝑜𝑔^⏻".contains(character_str.as_str()) {
+                if character.is_digit(10) || "+-*/().𝑙𝑛𝑙𝑜𝑔^⏻%".contains(character_str.as_str()) {
                     entry.set_text(&format!("{}{}", entry_text, character_str));
                 }
             }
         }
     }
 }
+

@@ -1,13 +1,15 @@
 use std::collections::VecDeque;
+use crate::evaluator::evaluate_expression;
 
 struct CalculatorState {
     entry_text: String,
     parenthesis_stack: VecDeque<char>,
 }
 
+#[allow(dead_code)]
 impl CalculatorState {
     pub fn new() -> Self {
-        CalculatorState {
+        CalculatorState{
             entry_text: String::new(),
             parenthesis_stack: VecDeque::new(),
         }
@@ -48,13 +50,9 @@ impl CalculatorState {
                 }
                 self.entry_text = evaluate_expression(&self.entry_text);
             },
-            _ if input.ends_with('%') => {
-                let number = &input[..input.len() - 1];
-                match number.parse::<f64>() {
-                    Ok(n) => self.entry_text.push_str(&(n / 100.0).to_string()),
-                    Err(_) => self.entry_text.push_str("Error: entrada no válida"),
-                }
-            },
+             "%" => {
+                self.entry_text.push('%');
+            }, 
             _ => {
                 if !self.parenthesis_stack.is_empty() && input.chars().all(|c| c.is_digit(10) || c == '.' || "+-*/".contains(c)) {
                     self.entry_text.push_str(input);

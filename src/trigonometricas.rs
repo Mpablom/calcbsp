@@ -1,4 +1,3 @@
-const PI: f64 = 3.14159265358979323846264338327950288;
 
 /// Calcula el seno de un ángulo en grados y redondea el resultado.
 pub fn sin(input: &str) -> String {
