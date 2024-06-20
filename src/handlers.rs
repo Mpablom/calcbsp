@@ -4,7 +4,7 @@ use crate::trigonometricas;
 
 pub fn create_buttons(grid: &gtk::Grid, entry: &gtk::Entry) {
     let buttons = [
-        ("C", 1, 1, 3, 1),("⏻", 1, 1, 4, 1),
+        (" ⌫ ", 1, 1, 2, 1),("C", 1, 1, 3, 1),("⏻", 1, 1, 4, 1),
         ("𝑙𝑛", 1, 1, 0, 3),("𝑙𝑜𝑔", 1, 1, 1, 3),("𝑒", 1,1,2,3),( "π", 1, 1, 3, 3),("%",1,1,4,3),
         ("^", 1, 1, 0, 4),("√", 1, 1, 1, 4),("𝑠𝑖𝑛", 1, 1, 2, 4),("𝑐𝑜𝑠", 1, 1, 3, 4),("𝑡𝑎𝑛",1,1,4,4),
         ("7", 1, 1, 0, 5),("8", 1, 1, 1, 5),("9", 1, 1, 2, 5),("(", 1, 1, 3, 5),(")",1,1,4,5),
@@ -32,7 +32,7 @@ pub fn create_buttons(grid: &gtk::Grid, entry: &gtk::Entry) {
 pub fn style_button(button: &gtk::Button, label: &str) {
     if ["/", "x", "-", "+", "=", "(", ")", "^", "√", "𝑙𝑛", "𝑙𝑜𝑔", "𝑠𝑖𝑛", "𝑐𝑜𝑠", "𝑡𝑎𝑛", "𝑒", "π", "%"].contains(&label) {
         button.style_context().add_class("operation");
-    } else if label == "C" || label == "( - )" {
+    } else if label == "C" || label == "( - )" || label == " ⌫ " {
         button.style_context().add_class("clear");
     } else if label == "⏻" {
         button.style_context().add_class("power");
@@ -58,6 +58,9 @@ fn attach_button(
         let new_text = match label_clone.as_str() {
             "=" => evaluate_expression(&text),
             "C" => String::new(),
+              " ⌫ " => {
+                text.chars().take(text.len().saturating_sub(1)).collect()
+            },
             "𝑠𝑖𝑛" => {
                 let result = evaluate_expression(&text).parse::<f64>().ok()
                     .map_or_else(|| "Error".to_string(), |value| trigonometricas::sin(&value.to_string()));
@@ -113,6 +116,9 @@ pub fn handle_key_press(key: &gdk::EventKey, entry: &gtk::Entry) {
     let entry_text = entry.text().to_string();
     match keyval {
         gdk::keys::constants::Return => {
+            entry.set_text(&evaluate_expression(&entry_text));
+        },
+         gdk::keys::constants::KP_Enter => {
             entry.set_text(&evaluate_expression(&entry_text));
         },
         gdk::keys::constants::Escape => entry.set_text(""),

@@ -22,6 +22,7 @@ pub fn run() {
     entry.style_context().add_class("screen");
     entry.set_halign(gtk::Align::Center);
     entry.set_valign(gtk::Align::Center);
+    entry.set_has_frame(false);
     grid.attach(&entry, 0, 0, 5, 1);
 
     entry.set_hexpand(true);
@@ -41,13 +42,17 @@ pub fn run() {
 
     create_buttons(&grid, &entry);
 
-    {
-        let entry_clone = entry.clone();
-        window.connect_key_press_event(move |_, key| {
-            handle_key_press(key, &entry_clone);
-            Inhibit(false)
-        });
-    }
+    let entry_clone = entry.clone();
+    window.connect_key_press_event(move |_, key| {
+        handle_key_press(key, &entry_clone);
+        Inhibit(false)
+    });
+
+    window.connect_focus_in_event(move |_, _| {
+        power_button.grab_focus();
+        Inhibit(false)
+    });
+
 
     apply_css();
 
