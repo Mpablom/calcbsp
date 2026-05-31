@@ -1,30 +1,135 @@
-.grid{
-    padding: 7px;
-    padding-right: 6px;
-    margin: 2px;
+.grid {
+    padding: 8px;
+    background-color: #000000;
 }
-.operation {
-    background-color: #d88876;
-    color: black;
+
+button.normal {
+    background: #000000;
+    background-image: none;
+    color: #dcd7ba;
     font-weight: bold;
-    font-family: 'JetBrains Mono NerdFont';
-   
+    font-size: 13pt;
+    border: 1px solid #2a2a37;
+    border-radius: 4px;
+    box-shadow: none;
+    text-shadow: none;
 }
-.normal{
-    font-family: 'JetBrains Mono NerdFont';
+
+button.normal:hover {
+    background: #1a1a1a;
 }
-.clear {
-    background-color: #5ba8d4;
-    color: rgb(255, 255, 255);
+
+button.operation {
+    background: #c04c5a;
+    background-image: none;
+    color: #000000;
     font-weight: bold;
+    font-size: 12pt;
+    border: 1px solid #a03a48;
+    border-radius: 4px;
+    box-shadow: none;
+    text-shadow: none;
 }
-.screen {
-    background-color: rgba(0, 0, 0, 0.8);
-    font-size: 20pt;
-    font-family: 'JetBrains Mono NerdFont';
+
+button.operation:hover {
+    background: #d05c6a;
 }
-.power{
-    background-color: #994949;
-    color: white;
+
+button.clear {
+    background: #5c7eb8;
+    background-image: none;
+    color: #000000;
     font-weight: bold;
+    font-size: 12pt;
+    border: 1px solid #4a6a9a;
+    border-radius: 4px;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+button.clear:hover {
+    background: #6c8ec8;
+}
+
+button.memory {
+    background: #3a3a4a;
+    background-image: none;
+    color: #dcd7ba;
+    font-weight: bold;
+    font-size: 11pt;
+    border: 1px solid #2a2a3a;
+    border-radius: 4px;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+button.memory:hover {
+    background: #4a4a5a;
+}
+
+button.constant {
+    background: #c4a060;
+    background-image: none;
+    color: #000000;
+    font-weight: bold;
+    font-size: 13pt;
+    border: 1px solid #a88848;
+    border-radius: 4px;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+button.constant:hover {
+    background: #d4b070;
+}
+
+button.mode {
+    background: #5a90a8;
+    background-image: none;
+    color: #000000;
+    font-weight: bold;
+    font-size: 12pt;
+    border: 1px solid #48788a;
+    border-radius: 4px;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+button.mode:hover {
+    background: #6aa0b8;
+}
+
+button.power {
+    background: #cc3340;
+    background-image: none;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 14pt;
+    border: 1px solid #aa2834;
+    border-radius: 4px;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+button.power:hover {
+    background: #dc4350;
+}
+
+entry.screen {
+    background: #000000;
+    background-image: none;
+    color: #dcd7ba;
+    font-size: 22pt;
+    font-weight: bold;
+    padding: 10px;
+    border: 1px solid #2a2a37;
+    border-radius: 6px;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+.status {
+    color: #76946a;
+    font-size: 10pt;
+    padding: 2px 8px;
 }

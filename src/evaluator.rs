@@ -1,112 +1,121 @@
-use evalexpr::{eval_with_context, Context, Function, HashMapContext, Value, EvalexprError};
-use regex::{Captures, Regex};
-use std::error::Error;
-use std::fmt;
+use evalexpr::*;
+use std::f64::consts;
+use std::sync::atomic::{AtomicBool, Ordering};
 
-const PI: f64 = 3.14159265358979323846264338327950288;
-const E: f64 = 2.71828182845904523536028747135266250;
+pub static DEGREE_MODE: AtomicBool = AtomicBool::new(false);
 
-pub struct CustomError(String);
-
-impl fmt::Display for CustomError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
+fn reg(c: &mut HashMapContext, name: &str, arity: usize, f: fn(f64) -> f64) {
+    c.set_function(name.into(), Function::new(Some(arity), Box::new(move |args| {
+        Ok(Value::from(f(args[0].as_number().unwrap_or(f64::NAN))))
+    }))).unwrap();
 }
 
-impl fmt::Debug for CustomError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "CustomError({})", self.0)
-    }
+fn deg_on() -> bool {
+    DEGREE_MODE.load(Ordering::Relaxed)
 }
 
-impl Error for CustomError {}
+fn context() -> HashMapContext {
+    let mut c = HashMapContext::new();
+
+    c.set_value("π".into(), Value::from(consts::PI)).unwrap();
+    c.set_value("𝑒".into(), Value::from(consts::E)).unwrap();
+
+    // Trig with degree/radian support
+    c.set_function("sin".into(), Function::new(Some(1), Box::new(|args| {
+        let x = args[0].as_number().unwrap_or(f64::NAN);
+        let r = if deg_on() { x.to_radians().sin() } else { x.sin() };
+        Ok(Value::from(if r.is_nan() || r.is_infinite() { f64::NAN } else { r }))
+    }))).unwrap();
+
+    c.set_function("cos".into(), Function::new(Some(1), Box::new(|args| {
+        let x = args[0].as_number().unwrap_or(f64::NAN);
+        let r = if deg_on() { x.to_radians().cos() } else { x.cos() };
+        Ok(Value::from(if r.is_nan() || r.is_infinite() { f64::NAN } else { r }))
+    }))).unwrap();
+
+    c.set_function("tan".into(), Function::new(Some(1), Box::new(|args| {
+        let x = args[0].as_number().unwrap_or(f64::NAN);
+        let r = if deg_on() { x.to_radians().tan() } else { x.tan() };
+        Ok(Value::from(if r.is_nan() || r.is_infinite() || r.abs() > 1e15 { f64::NAN } else { r }))
+    }))).unwrap();
+
+    // Inverse trig — output depends on mode
+    c.set_function("asin".into(), Function::new(Some(1), Box::new(|args| {
+        let x = args[0].as_number().unwrap_or(f64::NAN);
+        if x < -1.0 || x > 1.0 { return Ok(Value::from(f64::NAN)); }
+        let r = x.asin();
+        let r = if deg_on() { r.to_degrees() } else { r };
+        Ok(Value::from(if r.is_nan() { f64::NAN } else { r }))
+    }))).unwrap();
+
+    c.set_function("acos".into(), Function::new(Some(1), Box::new(|args| {
+        let x = args[0].as_number().unwrap_or(f64::NAN);
+        if x < -1.0 || x > 1.0 { return Ok(Value::from(f64::NAN)); }
+        let r = x.acos();
+        let r = if deg_on() { r.to_degrees() } else { r };
+        Ok(Value::from(if r.is_nan() { f64::NAN } else { r }))
+    }))).unwrap();
+
+    c.set_function("atan".into(), Function::new(Some(1), Box::new(|args| {
+        let x = args[0].as_number().unwrap_or(f64::NAN);
+        let r = x.atan();
+        let r = if deg_on() { r.to_degrees() } else { r };
+        Ok(Value::from(if r.is_nan() { f64::NAN } else { r }))
+    }))).unwrap();
+
+    // Simple unary functions (just f(x))
+    reg(&mut c, "sinh", 1, |x| x.sinh());
+    reg(&mut c, "cosh", 1, |x| x.cosh());
+    reg(&mut c, "tanh", 1, |x| x.tanh());
+    reg(&mut c, "asinh", 1, |x| x.asinh());
+    reg(&mut c, "acosh", 1, |x| if x < 1.0 { f64::NAN } else { x.acosh() });
+    reg(&mut c, "atanh", 1, |x| if x <= -1.0 || x >= 1.0 { f64::NAN } else { x.atanh() });
+    reg(&mut c, "ln", 1, |x| if x <= 0.0 { f64::NAN } else { x.ln() });
+    reg(&mut c, "log", 1, |x| if x <= 0.0 { f64::NAN } else { x.log10() });
+    reg(&mut c, "log2", 1, |x| if x <= 0.0 { f64::NAN } else { x.log2() });
+    reg(&mut c, "exp", 1, |x| x.exp());
+    reg(&mut c, "sqrt", 1, |x| if x < 0.0 { f64::NAN } else { x.sqrt() });
+    reg(&mut c, "cbrt", 1, |x| x.cbrt());
+    reg(&mut c, "abs", 1, |x| x.abs());
+
+    // Factorial
+    c.set_function("fact".into(), Function::new(Some(1), Box::new(|args| {
+        let x = args[0].as_number().unwrap_or(f64::NAN);
+        if x < 0.0 || x > 170.0 || (x - x.round()).abs() > 1e-10 {
+            return Ok(Value::from(f64::NAN));
+        }
+        let n = x.round() as u64;
+        let mut r = 1.0;
+        for i in 2..=n { r *= i as f64; if r.is_infinite() { return Ok(Value::from(f64::NAN)); } }
+        Ok(Value::from(r))
+    }))).unwrap();
+
+    c
+}
 
 pub fn evaluate_expression(expression: &str) -> String {
-    let expression = expression
-        .replace("x", "*")
-        .replace("𝑙𝑛", "lnf")
-        .replace("𝑙𝑜𝑔", "log10f")
-        .replace(" ^ ", "pow")
-        .replace("π", &PI.to_string())
-        .replace("𝑒", &E.to_string());
+    let expr = expression
+        .replace("×", "*")
+        .replace("÷", "/")
+        .replace("π", &consts::PI.to_string())
+        .replace("𝑒", &consts::E.to_string());
 
-    let expression = replace_percentage(&expression);
-    println!("Evaluating expression: {}", expression);
+    let trimmed = expr.trim();
+    if trimmed.is_empty() {
+        return String::new();
+    }
 
-    let mut context = HashMapContext::new();
-
-    context.set_value("π".to_string(), Value::from(PI)).unwrap();
-    context.set_value("𝑒".to_string(), Value::from(E)).unwrap();
-
-    context
-        .set_function("lnf".into(), Function::new(Some(1), Box::new(lnf_function)))
-        .unwrap();
-
-    context
-        .set_function("log10f".into(), Function::new(Some(1), Box::new(log10f_function)))
-        .unwrap();
-
-    context
-        .set_function("pow".into(), Function::new(Some(2), Box::new(pow_function)))
-        .unwrap();
-    context
-        .set_function("%".into(), Function::new(Some(2), Box::new(percentage_function)))
-        .unwrap();
-
-    let result = eval_with_context(&expression, &context);
-    match result {
-        Ok(value) => value.to_string(),
-        Err(err) => {
-            eprintln!("Evaluation error: {}", err);
-            "Error".to_string()
+    let ctx = context();
+    match eval_with_context(trimmed, &ctx) {
+        Ok(value) => {
+            let num: f64 = value.as_number().unwrap_or(f64::NAN);
+            if num.is_nan() || num.is_infinite() {
+                "Error".to_string()
+            } else {
+                let rounded = (num * 1_000_000_000.0).round() / 1_000_000_000.0;
+                rounded.to_string()
+            }
         }
+        Err(_) => "Error".to_string(),
     }
-}
-
-fn lnf_function(args: &[Value]) -> Result<Value, EvalexprError> {
-    check_argument_count(args, 1)?;
-    let value = args[0].as_number()?;
-    Ok(Value::from(value.ln()))
-}
-
-fn log10f_function(args: &[Value]) -> Result<Value, EvalexprError> {
-    check_argument_count(args, 1)?;
-    let value = args[0].as_number()?;
-    Ok(Value::from(value.log10()))
-}
-
-fn pow_function(args: &[Value]) -> Result<Value, EvalexprError> {
-    check_argument_count(args, 2)?;
-    let base = args[0].as_number()?;
-    let exponent = args[1].as_number()?;
-    Ok(Value::from(base.powf(exponent)))
-}
-
-fn percentage_function(args: &[Value]) -> Result<Value, EvalexprError> {
-    check_argument_count(args, 2)?;
-    let number = args[0].as_number()?;
-    let percentage = args[1].as_number()?;
-    Ok(Value::from(number * (percentage / 100.0)))
-}
-
-fn check_argument_count(args: &[Value], expected_count: usize) -> Result<(), EvalexprError> {
-    if args.len() != expected_count {
-        return Err(EvalexprError::WrongFunctionArgumentAmount { actual: args.len(), expected: expected_count });
-    }
-    Ok(())
-}
-fn replace_percentage(expression: &str) -> String {
-    let re = Regex::new(r"(\d+(\.\d+)?)(\s*%)(\s*)(\d+(\.\d+)?)?").unwrap();
-    let replaced_expression = re.replace_all(expression, |caps: &Captures| {
-        let number = caps.get(1).unwrap().as_str();
-        let percentage = if let Some(matched) = caps.get(5) {
-            matched.as_str().parse::<f64>().unwrap() / 100.0
-        } else {
-            1.0
-        };
-        format!("({} * {})", number, percentage)
-    });
-
-    replaced_expression.to_string()
 }

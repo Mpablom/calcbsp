@@ -1,12 +1,9 @@
 [package]
 name = "calcbsp"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 [dependencies]
 evalexpr = "4.0.0"
 gtk = "0.14.0"
 gdk = "0.14.0"
-pango = "0.19.5"
-bigdecimal = "0.3.0"
-regex = "1.5.4"

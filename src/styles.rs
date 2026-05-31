@@ -8,6 +8,6 @@ pub fn apply_css() {
     gtk::StyleContext::add_provider_for_screen(
         &gdk::Screen::default().expect("Error initializing gtk css provider."),
         &provider,
-        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+        9999,
     );
 }

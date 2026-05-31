@@ -1,16 +1,20 @@
+use std::rc::Rc;
+use std::cell::RefCell;
 use gtk::prelude::*;
-use crate::handlers::{handle_key_press, create_buttons};
+use crate::handlers::{self, SharedState, AppState};
 use crate::styles::apply_css;
 
 pub fn run() {
     gtk::init().expect("Failed to initialize GTK.");
 
     let window = gtk::Window::new(gtk::WindowType::Toplevel);
-    window.set_title("Calculadora");
+    window.set_title("Calculadora Científica");
+    window.set_resizable(false);
+    window.set_position(gtk::WindowPosition::Center);
 
     let grid = gtk::Grid::new();
-    grid.set_row_spacing(5);
-    grid.set_column_spacing(5);
+    grid.set_row_spacing(4);
+    grid.set_column_spacing(4);
     grid.set_halign(gtk::Align::Center);
     grid.set_valign(gtk::Align::Center);
     grid.style_context().add_class("grid");
@@ -18,45 +22,34 @@ pub fn run() {
 
     let entry = gtk::Entry::new();
     entry.set_editable(false);
-    entry.set_size_request(350, 150);
+    entry.set_size_request(360, 55);
     entry.style_context().add_class("screen");
-    entry.set_halign(gtk::Align::Center);
+    entry.set_halign(gtk::Align::Fill);
     entry.set_valign(gtk::Align::Center);
     entry.set_has_frame(false);
-    grid.attach(&entry, 0, 0, 5, 1);
+    entry.set_xalign(1.0);
+    grid.attach(&entry, 0, 0, 6, 1);
 
-    entry.set_hexpand(true);
-    entry.set_widget_name("screen");
+    let status = gtk::Label::new(Some("RAD"));
+    status.set_halign(gtk::Align::Start);
+    status.set_valign(gtk::Align::Center);
+    status.style_context().add_class("status");
+    grid.attach(&status, 0, 1, 6, 1);
 
-    let power_label = gtk::Label::new(None);
-    power_label.set_text("⏻");
-    let power_button = gtk::Button::new();
-    power_button.add(&power_label);
-    crate::handlers::style_button(&power_button, "⏻");
-    power_button.set_size_request(50, 50);
+    let state: SharedState = Rc::new(RefCell::new(AppState::new()));
 
-    grid.attach(&power_button, 4, 1, 1, 1);
-    power_button.connect_clicked(|_| {
-        gtk::main_quit();
-    });
+    handlers::create_buttons(&grid, &entry, &status, state.clone());
 
-    create_buttons(&grid, &entry);
-
-    let entry_clone = entry.clone();
+    let entry_c = entry.clone();
+    let state_c = state.clone();
+    let status_c = status.clone();
     window.connect_key_press_event(move |_, key| {
-        handle_key_press(key, &entry_clone);
+        handlers::handle_key_press(key, &entry_c, &state_c, &status_c);
         Inhibit(false)
     });
-
-    window.connect_focus_in_event(move |_, _| {
-        power_button.grab_focus();
-        Inhibit(false)
-    });
-
 
     apply_css();
 
-    window.set_resizable(false);
     window.show_all();
     gtk::main();
 }

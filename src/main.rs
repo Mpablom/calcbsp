@@ -1,13 +1,12 @@
-extern crate evalexpr;
-extern crate gdk;
 extern crate gtk;
+extern crate gdk;
 
 mod ui;
 mod handlers;
 mod evaluator;
 mod styles;
-mod trigonometricas;
-mod calculator_state;
+mod equations;
+
 fn main() {
     ui::run();
 }
